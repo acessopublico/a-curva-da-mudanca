@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Curva da Mudança</title>
+
+    <!-- Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Khand:wght@400;700&family=Barlow:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- AOS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+
+    <style>
+        /* ---------- CORES ---------- */
+        :root {
+            --color-primary-dark: #263868;
+            --color-accent-light: #0096D1;
+            --color-secondary-alert: #D2AE6D;
+            --color-gray: #A9ABAE;
+            --color-blue-medium: #006199;
+            --color-white: #FEFEFE;
+            --color-black: #000000;
+            --color-separator: #E0E0E0;
+        }
+
+        /* ---------- BASE ---------- */
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: all .3s ease-in-out; }
+        body {
+            font-family: 'Barlow', sans-serif;
+            font-weight: 400;
+            color: var(--color-primary-dark);
+            background: #fff;
+            line-height: 1.6;
+        }
+
+        /* ---------- TIPOGRAFIA ---------- */
+        h3, .summary-title, .estagio-section h4 {
+            font-family: 'Khand', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .estagio-header h3 { font-size: 1.5rem; margin: 0; }
+        .summary-title { font-size: 1.1rem; letter-spacing: 0.5px; }
+        .estagio-section h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+        .estagio-header p, .reflexao p { font-family: 'Barlow', sans-serif; font-style: italic; font-weight: 400; font-size: 0.9rem; color: #666; }
+        .estagio-list li { font-family: 'Barlow', sans-serif; font-weight: 400; font-size: 1rem; color: #333; }
+        .summary-nav a { font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 0.85rem; }
+        .btn-voltar, .btn-video {
+            font-family: 'Barlow', sans-serif;
+            font-weight: 700;
+        }
+
+        /* ---------- BARRA DE PROGRESSO ---------- */
+        .progress-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 6px;
+            background: #e0e0e0;
+            z-index: 1000;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--color-primary-dark);
+            width: 0%;
+            transition: width .2s ease;
+        }
+
+        /* ---------- CABEÇALHO FIXO ---------- */
+        .header-summary {
+            background: var(--color-primary-dark);
+            color: #fff;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0,0,0,.1);
+            transition: background 0.3s;
+        }
+        .header-summary.active {
+            background: var(--color-white);
+            color: var(--color-primary-dark);
+            box-shadow: 0 4px 15px rgba(0,0,0,.15);
+        }
+        .header-summary.active .summary-title,
+        .header-summary.active .summary-nav a {
+            color: var(--color-primary-dark);
+        }
+        .header-summary.active .summary-nav a:hover,
+        .header-summary.active .summary-nav a.active {
+            background: var(--color-accent-light);
+            color: var(--color-white);
+        }
+
+        .summary-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .summary-nav {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .summary-nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all .3s;
+            white-space: nowrap;
+        }
+        .summary-nav a:hover,
+        .summary-nav a.active {
+            background: var(--color-accent-light);
+            color: var(--color-primary-dark);
+        }
+
+        /* ---------- CONTEÚDO ---------- */
+        .mapa-estagios {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 25px 15px 80px;
+        }
+        .estagio-card {
+            background: var(--color-white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.1);
+            transition: all .3s;
+            border-left: 5px solid transparent;
+            border-top: 1px solid var(--color-separator);
+            scroll-margin-top: 120px;
+        }
+        .estagio-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(38,56,104,.2);
+            border-left: 5px solid var(--color-primary-dark);
+        }
+        .estagio-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .estagio-icon {
+            background: var(--color-blue-medium);
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            margin-right: 20px;
+        }
+        .estagio-section {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--color-separator);
+        }
+        .estagio-section h4 i {
+            color: var(--color-blue-medium);
+            margin-right: 8px;
+        }
+        .estagio-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .estagio-list li {
+            position: relative;
+            margin-bottom: 8px;
+            padding-left: 20px;
+        }
+        .estagio-list li::before {
+            content: "•";
+            color: var(--color-accent-light);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        .reflexao {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f7fcfb;
+            border: 1px solid var(--color-accent-light);
+            font-style: italic;
+        }
+        .reflexao i {
+            color: var(--color-blue-medium);
+            margin-right: 5px;
+        }
+
+        /* ---------- IMAGEM EXPANSÍVEL ---------- */
+        .image-expand {
+            text-align: center;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .image-expand img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: zoom-in;
+            transition: transform 0.3s;
+        }
+        .image-expand img:hover { transform: scale(1.02); }
+
+        /* ---------- MODAL ---------- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .modal img {
+            max-width: 95%;
+            max-height: 95vh;
+            border-radius: 12px;
+        }
+        .modal.active { display: flex; }
+
+        /* ---------- BOTÃO VÍDEO (NEUTRO) ---------- */
+        .btn-video {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--color-accent-light);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            margin: 1.5rem auto;
+            box-shadow: 0 4px 12px rgba(0,150,209,0.3);
+            transition: all 0.3s;
+        }
+        .btn-video:hover {
+            background: var(--color-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(38,56,104,0.4);
+        }
+        .btn-video i {
+            font-size: 1.3rem;
+        }
+
+        /* ---------- BOTÃO VOLTAR ---------- */
+        .btn-voltar {
+            display: inline-block;
+            background: var(--color-accent-light);
+            color: #fff;
+            border-radius: 50px;
+            padding: 10px 24px;
+            margin-top: 20px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: background .3s;
+            box-shadow: 0 2px 6px rgba(0,0,0,.15);
+        }
+        .btn-voltar:hover { background: var(--color-primary-dark); }
+
+        /* ---------- RESPONSIVO ---------- */
+        @media (max-width: 768px) {
+            .summary-nav { justify-content: center; }
+            .summary-title { text-align: center; width: 100%; }
+            .mapa-estagios { padding-bottom: 100px; }
+            .btn-video { font-size: 0.9rem; padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Barra de progresso -->
+<div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<!-- Cabeçalho fixo -->
+<header class="header-summary" id="headerSummary">
+    <div class="summary-container">
+        <div class="summary-title">A CURVA DA MUDANÇA</div>
+        <nav class="summary-nav">
+            <a href="#intro" data-stage="1">Introdução</a>
+            <a href="#visualizar" data-stage="2">Visualizar</a>
+            <a href="#video" data-stage="3">Vídeo</a>
+            <a href="#risco" data-stage="4">Risco</a>
+            <a href="#dica" data-stage="5">Dica</a>
+            <a href="#pausa" data-stage="6">Pausa</a>
+            <a href="#teste" data-stage="7">Teste</a>
+            <a href="#ajuda" data-stage="8">Ajuda</a>
+            <a href="#mensagem" data-stage="9">Mensagem</a>
+            <a href="#lembrete" data-stage="10">Lembrete</a>
+        </nav>
+    </div>
+</header>
+
+<!-- Conteúdo -->
+<div class="mapa-estagios">
+
+    <!-- 1. INTRODUÇÃO -->
+    <div class="estagio-card" id="intro" data-aos="fade-up">
+        <div class="estagio-header">
+            <div class="estagio-icon"><i class="fas fa-info-circle"></i></div>
+            <div><h3>ENTENDENDO O PROCESSO DE ADAPTAÇÃO</h3><p>“Como lidamos com o novo?”</p></div>
+        </div>
+        <div class="estagio-section">
+            <h4><i class="fas fa-heart"></i> Variáveis Fundamentais</h4>
+            <ul class="estagio-list">
+                <li><strong>Moral:</strong> energia, confiança e disposição diante do novo.</li>
+                <li><strong>Competência:</strong> domínio do novo cenário, tarefa ou realidade.</li>
+            </ul>
+        </div>
+        <div class="estagio-section">
+            <h4><i class="fas fa-chart-line"></i> O Vale de Adaptação</h4>
+            <ul class="estagio-list">
+                <li>Queda temporária de moral e competência.</li>
+                <li>Sentimentos: insegurança, perda de controle, desmotivação.</li>
+                <li>Não é permanente: reconstrução com compreensão e aceitação.</li>
+            </ul>
+        </div>
+        <div class="reflexao"><p><i class="fas fa-lightbulb"></i> Esse ciclo pode ser acelerado com liderança empática, comunicação clara e aprendizado contínuo.</p></div>
+    </div>
+
+    <!-- 2. VISUALIZAR A CURVA -->
+    <div class="estagio-card" id="visualizar" data-aos="fade-up">
+        <div class="estagio-header">
+            <div class="estagio-icon"><i class="fas fa-chart-line"></i></div>
+            <div><h3>VISUALIZE A CURVA</h3><p>“O caminho natural da mudança”</p></div>
+        </div>
+        <div class="estagio-section">
+            <p>A Curva da Mudança mostra o movimento entre os estágios de <em>negação, resistência, exploração e aceitação</em>.</p>
+            <div class="image-expand">
+                <img src="https://fpgomes.com.br/wp-content/uploads/2023/09/Screenshot_30-1024x549.png" alt="Curva da Mudança" id="curve-img">
+            </div>
+            <div class="modal" id="image-modal">
+                <img src="https://fpgomes.com.br/wp-content/uploads/2023/09/Screenshot_30-1024x549.png" alt="Curva da Mudança">
+            </div>
+        </div>
+    </div>
+
+<!-- 3. VÍDEO (BOTÃO NEUTRO) -->
+<div class="estagio-card" id="video" data-aos="fade-up">
+  <div class="estagio-header">
+    <div class="estagio-icon">
+      <i class="fas fa-play-circle"></i>
+    </div>
+    <div>
+      <h3>1.1 VÍDEO</h3>
+      <p>“Explicação completa das fases”</p>
+    </div>
+  </div>
+
+  <div class="estagio-section">
+    <p style="text-align: center; margin: 1rem 0;">
+      Assista à explicação completa sobre como cada fase da mudança afeta equipes e indivíduos.
+    </p>
+    <div style="text-align: center;">
+      <a
+        href="https://www.youtube.com/watch?v=CDNkAgGi4DY"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-video"
+        style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #003366; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 500; transition: 0.3s;"
+      >
+        <i class="fas fa-play" style="margin-right: 8px;"></i>
+        Assistir Vídeo
+      </a>
+    </div>
+  </div>
+</div>
+<!-- 4. ROTA DE RISCO -->
+    <div class="estagio-card ramificacao-card" id="risco" data-aos="zoom-in">
+        <div class="estagio-header">
+            <div class="estagio-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div><h3>1.2 ROTA DE RISCO</h3><p>“Quem sai da curva na crise”</p></div>
+        </div>
+        <div class="estagio-section">
+            <h4><i class="fas fa-user"></i> Comportamentos</h4>
+            <ul class="estagio-list">
+                <li>Focam no que perderam, não no que podem aprender.</li>
+                <li>Resistem a novas práticas, processos ou ferramentas.</li>
+                <li>Influenciam negativamente o clima do grupo.</li>
+            </ul>
+        </div>
+        <div class="estagio-section">
+            <h4><i class="fas fa-hands-helping"></i> Ação da Liderança</h4>
+            <ul class="estagio-list">
+                <li>Reconhecer e apoiar quem está nessa fase.</li>
+                <li>Transformar crise em crescimento.</li>
+            </ul>
+        </div>
+        <div class="reflexao"><p><i class="fas fa-exclamation-circle"></i> Nem todos conseguem atravessar o vale. A liderança é o elo.</p></div>
+    </div>
+
+    <!-- 5. DICA PRÁTICA -->
+    <div class="estagio-card" id="dica" data-aos="fade-up">
+        <div class="estagio-header">
+            <div class="estagio-icon"><i class="fas fa-lightbulb"></i></div>
+            <div><h3>DICA PRÁTICA</h3><p>“Autoconsciência na mudança”</p></div>
+        </div>
+        <div class="estagio-section">
+            <p style="text-align:center; font-weight:600; margin:1rem 0;">“Em que parte da curva estou agora?”</p>
+            <p>Entender isso é o primeiro passo para atravessar o vale com consciência e evoluir mais rápido.</p>
+        </div>
+    </div>
+
+    <!-- 6. PAUSA -->
+    <div class="estagio-card" id="pausa" data-aos="fade-up">
+        <div class="estagio-header">
+            <div class="estagio-icon"><i class="fas fa-pause-circle"></i></div>
+            <div><h3>PAUSA DE 2 MINUTOS</h3><p>“Conecte-se com a mudança”</p></div>
+        </div>
+        <div class="estagio-section">
+            <p><strong>Pergunte-se:</strong></p>
+            <ul class="estagio-list">
+                <li>“O que mudou na minha função — e como estou lidando com isso?”</li>
+                <li>Estou colaborando com o novo, experimentando e aprendendo?</li>
+                <li>Ou estou apenas mantendo o antigo funcionando, resistindo?</li>
+            </ul>
+        </div>
+        <div class="reflexao"><p><i class="fas fa-brain"></i> Essa pausa simples ajuda a tomar consciência do próprio posicionamento na curva.</p></div>
+    </div>
+
+    <!-- 7. TESTE RÁPIDO -->
+    <div class="estagio-card" id="teste" data-aos="fade-up">
+        <div class="estagio-header">
+            <div class="estagio-icon"><i class="fas fa-search"></i></div>
+            <div><h3>TESTE RÁPIDO DE REFLEXÃO</h3><p>“O que depende de mim?”</p></div>
+        </div>
+        <div class="estagio-section">
+            <h4><i class="fas fa-question-circle"></i> Pergunta-chave</h4>
+            <p style="font-size:1.1rem; margin:1rem 0;">“Com as mudanças e automações, o que dentro do meu setor ainda depende de mim — e o que já posso simplificar ou automatizar melhor?”</p>
+        </div>
+        <div class="estagio-section">
+            <h4><i class="fas fa-check-circle"></i> Próximo passo</h4>
+            <ol style="margin-left:1.5rem; margin-top:0.5rem;">
+                <li>Anote uma resposta prática.</li>
+                <li>Transforme essa resposta em uma ação de teste concreto.</li>
+            </ol>
+            <p><strong>Exemplos:</strong></p>
+            <ul class="estagio-list">
+                <li>“Hoje vou registrar X direto no sistema, sem planilha.”</li>
+                <li>“Vou revisar se o fluxo que eu fazia manual pode ser automatizado.”</li>
+            </ul>
+        </div>
+        <div class="estagio-section">
+            <a href="https://pflab.top/DPZB477QV5" target="_blank" class="btn-voltar" style="background:var(--color-accent-light); display:inline-block; text-align:center;">
+                Quero fazer a diferença
+            </a>
+        </div>
+    </div>
+
+    <!-- 8. PARA QUEM PEDIR AJUDA -->
+    <div class="estagio-card" id="ajuda" data-aos="fade-up">
+        <div class="estagio-header">
+            <div class="estagio-icon"><i class="fas fa-hands-helping"></i></div>
+            <div><h3>PARA QUEM PEDIR AJUDA</h3><p>“Escolha o apoio certo”</p></div>
+        </div>
+        <div class="estagio-section">
+            <ul class="estagio-list">
+                <li><strong>Líder imediato:</strong> remove obstáculos ou aprova ações.</li>
+                <li><strong>Mentor de pares do setor:</strong> dúvidas práticas de execução, “mão na massa”.</li>
+                <li><strong>Plantão Gente & Gestão:</strong> entendimento da mudança ou do fluxo.</li>
+                <li><strong>Qualidade (POP/Checklist):</strong> “qual é o padrão correto?”.</li>
+                <li><strong>TI / Sistemas (Sankhya, PontoTel, PL):</strong> problemas de acesso, erro ou tela.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 9. MENSAGEM PRONTA -->
+    <div class="estagio-card" id="mensagem" data-aos="fade-up">
+        <div class="estagio-header">
+            <div class="estagio-icon"><i class="fas fa-envelope"></i></div>
+            <div><h3>EXEMPLO DE MENSAGEM PRONTA</h3><p>“Peça orientação com clareza”</p></div>
+        </div>
+        <div class="estagio-section">
+            <div style="background:#f1f5f9; border:2px dashed var(--color-gray); padding:1.5rem; border-radius:8px; font-family:monospace; white-space:pre-line; color:#263868;">
+Assunto: Dúvida prática após meu teste
+
+Oi [Nome], acompanhei as informações disponibilizadas no canal Gente & Gestão, na parte “Novo Mundo”, sobre as mudanças.
+Preciso de uma orientação rápida sobre [descreva sua dúvida].
+Pode me ajudar?
+
+Essa mensagem é direta, objetiva e mostra engajamento com o novo.
+            </div>
+        </div>
+    </div>
+
+    <!-- 10. LEMBRETE -->
+    <div class="estagio-card" id="lembrete" data-aos="fade-up">
+        <div class="estagio-header">
+            <div class="estagio-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div><h3>EVITE A “SAÍDA DA CURVA”</h3><p>“Resistência à adaptação”</p></div>
+        </div>
+        <div class="estagio-section">
+            <p>Se você não testa, compara só com o antigo ou desanima o time, está sinalizando <strong>resistência</strong>.</p>
+            <p><strong>Resposta prática:</strong></p>
+            <ol style="margin-left:1.5rem; margin-top:0.5rem;">
+                <li>Pause 2 minutos para refletir.</li>
+                <li>Escolha 1 teste simples.</li>
+                <li>Peça 1 ajuda a alguém da lista acima.</li>
+            </ol>
+            <p>Pequenos testes e buscas de ajuda constantes mantêm você e sua equipe dentro da curva, acelerando aprendizado e resultados.</p>
+        </div>
+    </div>
+
+<!-- BOTÃO VOLTAR -->
+<div style="text-align: center; margin-top: 50px; padding-bottom: 80px;">
+  <a
+    href="javascript:void(0);"
+    class="btn-retornar"
+    onclick="goBack();"
+    style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #003366; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 500; transition: 0.3s;"
+  >
+    Retornar à Página Anterior
+  </a>
+</div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+  // Função botão voltar
+  function goBack() {
+    if (document.referrer) {
+      window.history.back();
+    } else {
+      window.location.href = '/index.html'; // altere para a página inicial do seu site
+    }
+  }
+
+  // Progress bar
+  function updateProgressBar() {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) {
+      progressBar.style.width = scrolled + '%';
+    }
+  }
+  window.onscroll = updateProgressBar;
+
+  // AOS + Navegação + Destaque ativo + Fundo branco
+  document.addEventListener('DOMContentLoaded', () => {
+    AOS.init({ once: true, duration: 800 });
+
+    const header = document.getElementById('headerSummary');
+
+    // Navegação smooth e destaque ativo
+    document.querySelectorAll('.summary-nav a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = link.getAttribute('href');
+        const el = document.querySelector(target);
+        const offset = 100;
+        const pos = el.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: pos, behavior: 'smooth' });
+
+        document.querySelectorAll('.summary-nav a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+        header.classList.add('active');
+      });
+    });
+
+    // Scroll spy para atualizar destaque do menu
+    window.addEventListener('scroll', () => {
+      let current = '';
+      document.querySelectorAll('.estagio-card').forEach(card => {
+        if (card.getBoundingClientRect().top <= 150) current = card.id;
+      });
+      document.querySelectorAll('.summary-nav a').forEach(a => {
+        a.classList.remove('active');
+        if (a.getAttribute('href') === `#${current}`) {
+          a.classList.add('active');
+          header.classList.add('active');
+        }
+      });
+      if (window.pageYOffset === 0) {
+        header.classList.remove('active');
+      }
+    });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const curveImg = document.getElementById('curve-img');
+    const imageModal = document.getElementById('image-modal');
+
+    // Se um (ou ambos) elementos não existirem, apenas não registra os handlers
+    if (!curveImg || !imageModal) {
+      console.warn('Elementos de imagem expansível não encontrados:', {
+        curveImgExists: !!curveImg,
+        imageModalExists: !!imageModal
+      });
+      return;
+    }
+
+    // Abre o modal ao clicar na imagem
+    curveImg.addEventListener('click', () => {
+      imageModal.classList.add('active');
+      // opcional: bloquear rolagem do body enquanto modal está ativo
+      document.body.style.overflow = 'hidden';
+    });
+
+    // Fecha o modal ao clicar na área de fundo
+    imageModal.addEventListener('click', () => {
+      imageModal.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+
+    // Evita que clicar na própria imagem (dentro do modal) feche o modal
+    const modalImage = imageModal.querySelector('img, .modal-content');
+    if (modalImage) {
+      modalImage.addEventListener('click', e => e.stopPropagation());
+    }
+
+    // Fecha com a tecla Esc
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && imageModal.classList.contains('active')) {
+        imageModal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+</script>
